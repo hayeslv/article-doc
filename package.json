@@ -1,0 +1,25 @@
+{
+  "name": "article-doc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:serve": "vitepress serve docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hayeslv/article-doc.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hayeslv/article-doc/issues"
+  },
+  "homepage": "https://github.com/hayeslv/article-doc#readme",
+  "devDependencies": {
+    "vitepress": "^1.0.0-alpha.4"
+  }
+}
