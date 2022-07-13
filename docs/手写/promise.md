@@ -690,6 +690,198 @@ MyPromise.resolve("成功")
 
 
 
+### 5、Promise.all
+
+`promise.all` 解决的是并发问题，多个异步并发获取最终的结果（如果有一个失败则走失败的回调）
+
+```js
+MyPromise.all = function(values) {
+  if(!Array.isArray(values)) {
+    const type = typeof values
+    return new TypeError(`TypeError: ${type} ${values} is not iterable`)
+  }
+  return new MyPromise((resolve, reject) => {
+    let result = []
+    const processResultByKey = (value, index) => {
+      result[index] = value
+      if(index === values.length - 1) {
+        resolve(result)
+      }
+    }
+    for(let i=0; i<values.length; i++) {
+      let value = values[i]
+      if(value && typeof value.then === "function") {
+        value.then(
+          value => processResultByKey(value, i),
+          reject
+        )
+      } else {
+        processResultByKey(value, i)
+      }
+    }
+  })
+}
+```
+
+测试代码
+
+```js
+let p1 = new MyPromise((resolve, reject) => {
+  setTimeout(() => {
+    resolve("ok1")
+  }, 1000);
+})
+let p2 = new MyPromise((resolve, reject) => {
+  setTimeout(() => {
+    resolve("ok2")
+  }, 1000);
+})
+
+MyPromise.all([1,2,3,p1,p2]).then(data => {
+  console.log("resolve", data);
+}).catch(err => {
+  console.log("reject", err);
+})
+```
+
+控制台打印
+
+```js
+"resolve [ 1, 2, 3, 'ok1', 'ok2' ]"
+```
+
+
+
+### 6、Promise.race
+
+用来处理多个请求，采用最快的（谁先完成用谁的）
+
+```js
+MyPromise.race = function(promises) {
+  return new MyPromise((resolve, reject) => {
+    // for循环，一起执行
+    for(let i=0; i<promises.length; i++) {
+      let promise = promises[i]
+      if(promise && typeof promise.then === "function") {
+        promise.then(resolve, reject)
+      } else { // 普通值
+        resolve(promise)
+      }
+    }
+  })
+}
+```
+
+测试代码
+
+```js
+let p1 = new MyPromise((resolve, reject) => {
+  setTimeout(() => {
+    resolve('ok1');
+  }, 1000);
+})
+
+let p2 = new MyPromise((resolve, reject) => {
+  setTimeout(() => {
+    reject('ok2');
+  }, 999);
+})
+
+MyPromise.race([p1,p2]).then(data => {
+  console.log('resolve', data);
+}, err => {
+  console.log('reject', err);
+})
+```
+
+控制台输出
+
+```js
+"reject ok2"
+```
+
+
+
+## 四、promise的缺陷
+
+特别需要注意的是：Promise 是没有中断方法的
+
+`xht.abort()、ajax` 有自己的中断方法，
+
+`axios` 是基于 `ajax` 实现的；
+
+`fetch` 基于 `promise`，所以它的请求是无法中断的。
+
+我们可以使用 `race` 来自己封装中断方法：
+
+```js
+function wrap(promise) {
+  // 在这里包装一个promise，可以控制原来的promise是成功还是失败
+  let stop
+  let newPromise = new MyPromise((resolve, reject) => { // 延迟方法
+    stop = reject;
+  })
+  let p = MyPromise.race([promise, newPromise]) // 任何一个先成功或者失败，就可以获取到结果
+  p.stop = stop
+  return p
+}
+const promise = new MyPromise((resolve, reject) => {
+  setTimeout(() => { // 模拟接口调用
+    resolve("成功")
+  }, 1000);
+})
+
+let newPromise = wrap(promise)
+
+setTimeout(() => {
+  newPromise.stop("超时了")
+}, 999);
+
+newPromise.then(data => console.log("success", data))
+          .catch(err => console.log("error", err))
+```
+
+控制台打印
+
+```js
+"error 超时了"
+```
+
+
+
+## 五、promisify
+
+promisify 是把一个 node 中的 api 转换成 promise 的写法。 在 node 版本 12.18 以上，已经支持了原生的 promisify 方法：`const fs = require('fs').promises`。
+
+```js
+const promisify = (fn) => { // 典型的高阶函数 参数是函数 返回值是函数 
+  return (...args)=>{
+    return new Promise((resolve,reject)=>{
+      fn(...args,function (err,data) { // node中的回调函数的参数 第一个永远是error
+        if(err) return reject(err);
+        resolve(data);
+      })
+    });
+  }
+}
+```
+
+如果想要把 node 中所有的 api 都转换成 promise 的写法呢：
+
+```js
+const promisifyAll = (target) =>{
+  Reflect.ownKeys(target).forEach(key=>{
+    if(typeof target[key] === 'function'){
+      // 默认会将原有的方法 全部增加一个 Async 后缀 变成 promise 写法
+      target[key+'Async'] = promisify(target[key]);
+    }
+  });
+  return target;
+}
+```
+
+
+
 
 
 
