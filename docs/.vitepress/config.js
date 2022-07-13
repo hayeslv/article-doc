@@ -8,6 +8,7 @@ module.exports = {
     // 导航栏配置
     nav: [
       { text: "首页", link: "/" },
+      { text: "手写", link: "/手写/promise" },
       { text: "网络", link: "/网络/test", activeMatch: '^/网络/' },
       { 
         text: "HTML/CSS", 
@@ -19,7 +20,15 @@ module.exports = {
     ],
     // 左侧导航栏配置
     sidebar: {
-      
+      "/手写/": [
+        { 
+          text: "js基础", 
+          link: "/手写/promise", 
+          items: [
+            { text: "Promise", link: "/手写/promise" }
+          ] 
+        }
+      ],
       "/网络/": [
         { text: "标题1", link: "/网络/test", items: [] },
         { text: "标题2", items: [ { text: '跨域9法', link: '/网络/跨域9法' } ] }
