@@ -588,7 +588,7 @@ MyPromise.resolve(new MyPromise((resolve, reject) => {
 
 ### 2、Promise.reject
 
-默认产生一个失败的 `promise`，`Promise.reject` 会直接将值编程错误结果
+默认产生一个失败的 `promise`，`Promise.reject` 会直接将值变成错误结果
 
 ```js
 static reject(reason) {
