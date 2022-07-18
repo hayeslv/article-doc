@@ -12,6 +12,17 @@ Array.prototype.myMap = function(callback, thisArg) {
   return res
 }
 
+Array.prototype.myMap1 = function(callback, thisArg) {
+  if(!Array.isArray(this)) throw new TypeError("this不是一个数组");
+  if(typeof callback !== "function") return new TypeError(callback + "不是一个函数");
+  if(this.length === 0) return []
+
+  let res = []
+  this.reduce((pre, cur, index, arr) => {
+    return res[index] = callback.call(thisArg, cur, index, arr)
+  }, [])
+  return res
+}
 
 const arr1 = [1,2,3]
 const arr2 = arr1.myMap(v => v * 2)
