@@ -91,7 +91,7 @@ Array.prototype.myReduce = function(callback, initialValue) {
   // 使用数组第一个值作为初始值，则遍历的下标就得从1开始
   let i = initialValue === undefined ? 1 : 0
   for(i; i<this.length; i++) {
-    value = callback(value, this[i], i)
+    value = callback(value, this[i], i, this)
   }
   return value
 }
@@ -100,7 +100,7 @@ Array.prototype.myReduce = function(callback, initialValue) {
 **测试代码：**
 
 ```js
-const fn = (prev, cur, index) => {
+const fn = (prev, cur, index, array) => {
   return prev + cur
 }
 const arr = [1,2,3,4]
