@@ -169,6 +169,11 @@ const compile = function(template) {
     return `" + obj.${key} + "`
   });
   result = `return "${result}"`;
+  // 或者如下形式
+  // let result = template.replace(/{{(.+?)}}/g, (match, key) => {
+  //   return `" + ${key} + "`
+  // });
+  // result = `with(obj) { return "${result}" }`;
   return new Function("obj", result);
 }
 const template = "<p>Hello, I'm {{user.name}}! {{user.age}} years old!</p>"
@@ -180,6 +185,7 @@ const data = {
     age: 18
   }
 }
+
 const result = render(data)
 console.log(result); // <p>Hello, I'm hayes! 18 years old!</p>
 ```
